@@ -1,0 +1,13 @@
+{
+  "name": "figma-svg-import",
+  "version": "1.0.0",
+  "description": "Web To SVG - Drag and drop SVGs from the web",
+  "scripts": {
+    "build": "esbuild code.ts --bundle --outfile=code.js --sourcemap --external:react --external:react-dom --format=iife",
+    "watch": "esbuild code.ts --bundle --outfile=code.js --sourcemap --external:react --external:react-dom --format=iife --watch"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "1.58.0",
+    "esbuild": "0.17.19"
+  }
+}

@@ -1,0 +1,408 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Inter, sans-serif;
+        padding: 0;
+        margin: 0;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      /* Drop Zone Styles */
+      .drop-zone-container {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .drop-zone {
+        flex: 1;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        transition: all 0.2s ease;
+        min-height: 180px;
+        position: relative;
+      }
+
+      .drop-zone:hover {
+        border-color: #18a0fb;
+        background: #f0f8ff;
+      }
+
+      .drop-zone.dragging {
+        border-color: #18a0fb;
+        background: #e6f3ff;
+        border-style: solid;
+      }
+
+      .drop-zone.dragging::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(24, 160, 251, 0.05);
+        border-radius: 6px;
+      }
+
+      .drop-zone-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 12px;
+        opacity: 0.6;
+      }
+
+      .drop-zone-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+        text-align: center;
+        margin-bottom: 4px;
+      }
+
+      .drop-zone-subtext {
+        font-size: 12px;
+        color: #999;
+        text-align: center;
+      }
+
+      /* URL Input Section Styles */
+      .url-section {
+        padding: 16px 24px 24px;
+        border-top: 1px solid #e0e0e0;
+        background: white;
+      }
+
+      .url-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        color: #999;
+      }
+
+      .url-input-wrapper {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+
+      .url-input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.2s;
+        font-family: Inter, sans-serif;
+      }
+
+      .url-input:focus {
+        border-color: #18a0fb;
+      }
+
+      .url-input::placeholder {
+        color: #ccc;
+      }
+
+      .import-button {
+        padding: 10px 20px;
+        background: #18a0fb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+        font-family: Inter, sans-serif;
+      }
+
+      .import-button:hover:not(:disabled) {
+        background: #0d8fd9;
+      }
+
+      .import-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* Loading State */
+      .loading-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 6px;
+      }
+
+      .loading-overlay.show {
+        display: flex;
+      }
+
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e0e0e0;
+        border-top-color: #18a0fb;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #666;
+      }
+
+      /* Error Message */
+      .error-message {
+        display: none;
+        padding: 12px;
+        background: #fff4f4;
+        border: 1px solid #ffcccc;
+        border-radius: 6px;
+        color: #d32f2f;
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="drop-zone-container">
+      <div class="drop-zone" id="dropZone">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-upload-icon lucide-upload"
+        >
+          <path d="M12 3v12" />
+          <path d="m17 8-5-5-5 5" />
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        </svg>
+        <div class="drop-zone-text">Drag and drop SVG from web</div>
+        <div class="drop-zone-subtext">or paste a URL below</div>
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="loading-text">Importing SVG...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="url-section">
+      <label class="url-label" for="url">Import from URL</label>
+      <div class="error-message" id="errorMessage"></div>
+      <div class="url-input-wrapper">
+        <input
+          type="text"
+          class="url-input"
+          id="url"
+          placeholder="https://ex.co/image.svg"
+          autofocus
+        />
+        <button class="import-button" id="importButton">Import</button>
+      </div>
+    </div>
+
+    <script>
+      const dropZone = document.getElementById("dropZone");
+      const urlInput = document.getElementById("url");
+      const importButton = document.getElementById("importButton");
+      const errorMessage = document.getElementById("errorMessage");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add("show");
+        hideLoading();
+      }
+
+      function hideError() {
+        errorMessage.classList.remove("show");
+      }
+
+      function showLoading() {
+        loadingOverlay.classList.add("show");
+        importButton.disabled = true;
+        importButton.textContent = "Importing...";
+        hideError();
+      }
+
+      function hideLoading() {
+        loadingOverlay.classList.remove("show");
+        importButton.disabled = false;
+        importButton.textContent = "Import";
+      }
+
+      function isValidSvgUrl(url) {
+        try {
+          const parsed = new URL(url);
+          return parsed.pathname.toLowerCase().endsWith(".svg");
+        } catch {
+          return false;
+        }
+      }
+
+      function handleImport(content, isFile = false) {
+        hideError();
+        showLoading();
+
+        if (isFile) {
+          parent.postMessage(
+            { pluginMessage: { type: "import-svg-file", content } },
+            "*",
+          );
+        } else {
+          parent.postMessage(
+            { pluginMessage: { type: "import-svg", url: content } },
+            "*",
+          );
+        }
+      }
+
+      // Drag and Drop Handlers
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add("dragging");
+      });
+
+      dropZone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("dragging");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove("dragging");
+
+        const items = e.dataTransfer.items;
+
+        if (items) {
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.kind === "file") {
+              const file = item.getAsFile();
+              if (file && file.name.toLowerCase().endsWith(".svg")) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  handleImport(event.target.result, true);
+                };
+                reader.readAsText(file);
+                return;
+              } else if (file) {
+                showError("Please drop an SVG file");
+                return;
+              }
+            } else if (
+              item.kind === "string" &&
+              item.type === "text/uri-list"
+            ) {
+              item.getAsString((url) => {
+                if (url) {
+                  if (isValidSvgUrl(url)) {
+                    handleImport(url);
+                  } else {
+                    showError("URL must end with .svg");
+                  }
+                }
+              });
+              return;
+            }
+          }
+        }
+
+        // Fallback for browser drag
+        const data = e.dataTransfer.getData("text/plain");
+        if (data) {
+          if (isValidSvgUrl(data)) {
+            handleImport(data);
+          } else {
+            showError("Please drag an SVG file or valid SVG URL");
+          }
+        }
+      });
+
+      // URL Import Handlers
+      importButton.addEventListener("click", () => {
+        const url = urlInput.value.trim();
+        if (!url) {
+          showError("Please enter a URL");
+          return;
+        }
+        if (!isValidSvgUrl(url)) {
+          showError("URL must end with .svg");
+          return;
+        }
+        handleImport(url);
+      });
+
+      urlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          importButton.click();
+        }
+      });
+
+      urlInput.addEventListener("input", hideError);
+
+      // Handle messages from the plugin
+      window.onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (msg) {
+          if (msg.type === "error") {
+            showError(msg.message);
+          } else if (msg.type === "success") {
+            // Plugin will close automatically
+          }
+        }
+      };
+
+      // Focus input on load
+      urlInput.focus();
+    </script>
+  </body>
+</html>
