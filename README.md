@@ -1,12 +1,12 @@
 # URL To Vector - A Figma Plugin to Import SVG without Downloads
 
+![CommunityCover](./assets/CommunityCover.png)
+
 SVGs from web to canvas, no downloads needed.
 
 A simple plugin that lets you paste any SVG URL or drag-and-drop files directly into Figma. Skip the download step and get straight to designing.
 
-💖 **Love the project?** Show your support or use it directly on the Figma Community!
-
-[🔗 URL To Vector - Import SVG without Downloads](https://www.figma.com/community/plugin/1593759063512811267/url-to-vector-import-svg-without-downloads)
+💖 **Love the project?** Show your support or use it directly on the [Figma Community](https://www.figma.com/community/plugin/1593759063512811267/url-to-vector-import-svg-without-downloads)!
 
 ## Features
 
