@@ -285,7 +285,7 @@
         }
       }
 
-      function handleImport(content, isFile = false) {
+      async function handleImport(content, isFile = false) {
         hideError();
         showLoading();
 
@@ -295,10 +295,38 @@
             "*",
           );
         } else {
-          parent.postMessage(
-            { pluginMessage: { type: "import-svg", url: content } },
-            "*",
-          );
+          // Fetch SVG from URL - try raw URL first, then fall back to CORS proxy
+          try {
+            let svgText;
+            try {
+              // Try raw URL first
+              const directResponse = await fetch(content);
+              if (!directResponse.ok) {
+                throw new Error(`Failed to fetch: ${directResponse.status}`);
+              }
+              svgText = await directResponse.text();
+            } catch {
+              // Fall back to CORS proxy
+              const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(
+                content,
+              )}`;
+              const proxyResponse = await fetch(proxyUrl);
+              if (!proxyResponse.ok) {
+                throw new Error(`Failed to fetch: ${proxyResponse.status}`);
+              }
+              svgText = await proxyResponse.text();
+            }
+            parent.postMessage(
+              { pluginMessage: { type: "import-svg-file", content: svgText } },
+              "*",
+            );
+          } catch (error) {
+            showError(
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch SVG. Check the URL or try downloading the file.",
+            );
+          }
         }
       }
 

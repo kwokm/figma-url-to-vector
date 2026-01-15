@@ -1,7 +1,7 @@
 {
   "name": "figma-svg-import",
   "version": "1.0.0",
-  "description": "Web To SVG - Drag and drop SVGs from the web",
+  "description": "URL To Vector - Import SVG without Downloads",
   "scripts": {
     "build": "esbuild code.ts --bundle --outfile=code.js --sourcemap --external:react --external:react-dom --format=iife",
     "watch": "esbuild code.ts --bundle --outfile=code.js --sourcemap --external:react --external:react-dom --format=iife --watch"
