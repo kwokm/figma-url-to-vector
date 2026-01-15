@@ -1,8 +1,13 @@
 {
   "name": "URL To Vector - Import SVG without Downloads",
-  "id": "123456789",
+  "id": "1593759063512811267",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Users need to import SVGs from any URL source."
+  },
+  "documentAccess": "dynamic-page",
   "editorType": ["figma"]
 }

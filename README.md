@@ -1,12 +1,15 @@
 # URLtoSVG
 
-A simple Figma plugin that allows you to import SVG vectors directly from a web URL.
+SVGs from web to canvas, no downloads needed.
+
+A simple plugin that lets you paste any SVG URL or drag-and-drop files directly into Figma. Skip the download step and get straight to designing.
 
 ## Features
 
-- Import SVG files from any public URL ending in `.svg`
-- Validates URLs to ensure they point to SVG files
-- Error handling for invalid URLs or failed fetches
+- Import SVGs from any public URL ending in `.svg`
+- Drag and drop local SVG files directly onto the canvas
+- Handles CORS automatically with a fallback proxy
+- Validates URLs and provides clear error messages
 - Auto-centers viewport on imported SVG
 
 ## Setup
